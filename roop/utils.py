@@ -37,7 +37,7 @@ def run_ffmpeg(args):
 
 def set_fps(input_path, output_path, fps):
     input_path, output_path = path(input_path), path(output_path)
-    run_ffmpeg(f'-i "{input_path}" -filter:v fps=fps={fps} "{output_path}"')
+    run_ffmpeg(f'-i "{input_path}" -filter:v fps=fps={fps} -n "{output_path}"')
 
 
 def create_video(video_name, fps, output_dir):
