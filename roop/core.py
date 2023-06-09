@@ -184,6 +184,7 @@ def start(preview_callback = None):
     Path(output_dir).mkdir(exist_ok=True)
     status("detecting video's FPS...")
     fps, exact_fps = detect_fps(target_path)
+    print("\nfps, exact_fps: ", fps, exact_fps)
     if not args.keep_fps and fps > 30:
         this_path = output_dir + "/" + video_name + ".mp4"
         set_fps(target_path, this_path, 30)
