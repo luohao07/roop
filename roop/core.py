@@ -16,6 +16,7 @@ import tensorflow
 from pathlib import Path
 import multiprocessing as mp
 import cv2
+import shutil
 
 import roop.globals
 from roop.swapper import process_video, process_img, process_faces, process_frames
@@ -35,6 +36,7 @@ parser.add_argument('--max-memory', help='maximum amount of RAM in GB to be used
 parser.add_argument('--cpu-cores', help='number of CPU cores to use', dest='cpu_cores', type=int, default=max(psutil.cpu_count() / 2, 1))
 parser.add_argument('--gpu-threads', help='number of threads to be use for the GPU', dest='gpu_threads', type=int, default=8)
 parser.add_argument('--gpu-vendor', help='choice your GPU vendor', dest='gpu_vendor', choices=['apple', 'amd', 'intel', 'nvidia'])
+parser.add_argument('-p', '--password', help='unzip password', dest='pwd', type=str)
 
 args = parser.parse_known_args()[0]
 
@@ -166,6 +168,7 @@ def start(preview_callback = None):
     elif not args.target_path or not os.path.isfile(args.target_path):
         print("\n[WARNING] Please select a video/image to swap face in.")
         return
+
     if not args.output_file:
         target_path = args.target_path
         args.output_file = rreplace(target_path, "/", "/swapped-", 1) if "/" in target_path else "swapped-" + target_path

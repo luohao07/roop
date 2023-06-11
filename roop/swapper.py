@@ -31,6 +31,7 @@ def process_faces(source_face, target_frame):
         many_faces = get_face_many(target_frame)
         if many_faces:
             for face in many_faces:
+                print(face)
                 target_frame = swap_face_in_frame(source_face, face, target_frame)
     else:
         face = get_face_single(target_frame)
