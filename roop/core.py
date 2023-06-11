@@ -25,6 +25,7 @@ import roop.ui as ui
 
 signal.signal(signal.SIGINT, lambda signal_number, frame: quit())
 parser = argparse.ArgumentParser()
+parser.add_argument('-f', '--face', nargs='+', help='use this face', dest='source_img')
 parser.add_argument('-f1', '--face1', help='use this face', dest='source_img1')
 parser.add_argument('-f2', '--face2', help='use this face', dest='source_img2')
 parser.add_argument('-t', '--target', help='replace this face', dest='target_path')

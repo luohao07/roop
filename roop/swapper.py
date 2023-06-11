@@ -6,6 +6,8 @@ import insightface
 import threading
 import roop.globals
 from roop.analyser import get_face_single, get_face_many
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 FACE_SWAPPER = None
 THREAD_LOCK = threading.Lock()
@@ -25,12 +27,15 @@ def swap_face_in_frame(source_face, target_face, frame):
         return get_face_swapper().get(frame, target_face, source_face, paste_back=True)
     return frame
 
-
 def process_faces(source_face_1, source_face_2, target_frame):
     if roop.globals.all_faces:
         many_faces = get_face_many(target_frame)
         many_faces = sorted(many_faces, key=lambda x: x['bbox'][0])
         many_faces = [face for face in many_faces if face['gender'] == 0]
+        if not roop.globals.target_faces:
+            roop.globals.target_faces = many_faces
+        else:
+            many_faces = sort_by_target_faces(many_faces, roop.globals.target_faces)
         if (not many_faces) :
             return
         if len(many_faces) >= 1:
@@ -42,6 +47,24 @@ def process_faces(source_face_1, source_face_2, target_frame):
         if face:
             target_frame = swap_face_in_frame(source_face_1, face, target_frame)
     return target_frame
+
+def sort_by_target_faces(many_faces, target_faces):
+    # 检查特殊情况
+    if target_faces is None or len(target_faces) == 0:
+        return many_faces
+    elif len(target_faces) > len(many_faces):
+        target_faces = target_faces[:len(many_faces)]
+
+    # 计算相似度并排序
+    similarities = []
+    for i in range(len(target_faces)):
+        face = many_faces[i]
+        target_face = target_faces[i]
+        similarity = calculate_similarity(face.embedding, target_face.embedding)  # 使用你的相似度计算方法
+        similarities.append(similarity)
+
+    sorted_faces = [x for _, x in sorted(zip(similarities, many_faces), reverse=True)]
+    return sorted_faces
 
 
 def process_frames(args, frame_paths, progress=None):
