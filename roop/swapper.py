@@ -66,6 +66,11 @@ def sort_by_target_faces(many_faces, target_faces):
     sorted_faces = [x for _, x in sorted(zip(similarities, many_faces), reverse=True)]
     return sorted_faces
 
+def calculate_similarity(embedding1, embedding2):
+    embedding1 = np.array(embedding1).reshape(1, -1)  # 转换为二维数组
+    embedding2 = np.array(embedding2).reshape(1, -1)  # 转换为二维数组
+
+    return cosine_similarity(embedding1, embedding2)[0, 0]
 
 def process_frames(args, frame_paths, progress=None):
     source_face1 = get_face_single(cv2.imread(args.source_img1))
