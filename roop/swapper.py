@@ -26,26 +26,31 @@ def swap_face_in_frame(source_face, target_face, frame):
     return frame
 
 
-def process_faces(source_face, target_frame):
+def process_faces(source_face_1, source_face_2, target_frame):
     if roop.globals.all_faces:
         many_faces = get_face_many(target_frame)
-        if many_faces:
-            for face in many_faces:
-                print(face)
-                target_frame = swap_face_in_frame(source_face, face, target_frame)
+        many_faces = sorted(many_faces, key=lambda x: x['bbox'][0])
+        many_faces = [face for face in many_faces if face['gender'] == 0]
+        if (not many_faces) :
+            return
+        if len(many_faces) >= 1:
+            target_frame = swap_face_in_frame(source_face_1, many_faces[0], target_frame)
+        if len(many_faces) >= 2:
+            target_frame = swap_face_in_frame(source_face_2, many_faces[1], target_frame)
     else:
         face = get_face_single(target_frame)
         if face:
-            target_frame = swap_face_in_frame(source_face, face, target_frame)
+            target_frame = swap_face_in_frame(source_face_1, face, target_frame)
     return target_frame
 
 
-def process_frames(source_img, frame_paths, progress=None):
-    source_face = get_face_single(cv2.imread(source_img))
+def process_frames(args, frame_paths, progress=None):
+    source_face1 = get_face_single(cv2.imread(args.source_img1))
+    source_face2 = get_face_single(cv2.imread(args.source_img2))
     for frame_path in frame_paths:
         frame = cv2.imread(frame_path)
         try:
-            result = process_faces(source_face, frame)
+            result = process_faces(source_face1, source_face2, frame)
             cv2.imwrite(frame_path, result)
         except Exception as exception:
             print(exception)
@@ -54,7 +59,7 @@ def process_frames(source_img, frame_paths, progress=None):
             progress.update(1)
 
 
-def multi_process_frame(source_img, frame_paths, progress):
+def multi_process_frame(args, frame_paths, progress):
     threads = []
     num_threads = roop.globals.gpu_threads
     num_frames_per_thread = len(frame_paths) // num_threads
@@ -68,7 +73,7 @@ def multi_process_frame(source_img, frame_paths, progress):
             end_index += 1
             remaining_frames -= 1
         thread_frame_paths = frame_paths[start_index:end_index]
-        thread = threading.Thread(target=process_frames, args=(source_img, thread_frame_paths, progress))
+        thread = threading.Thread(target=process_frames, args=(args, thread_frame_paths, progress))
         threads.append(thread)
         thread.start()
         start_index = end_index
@@ -87,11 +92,11 @@ def process_img(source_img, target_path, output_file):
     print("\n\nImage saved as:", output_file, "\n\n")
 
 
-def process_video(source_img, frame_paths):
+def process_video(args, frame_paths):
     do_multi = roop.globals.gpu_vendor is not None and roop.globals.gpu_threads > 1
     progress_bar_format = '{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]'
     with tqdm(total=len(frame_paths), desc="Processing", unit="frame", dynamic_ncols=True, bar_format=progress_bar_format) as progress:
         if do_multi:
-            multi_process_frame(source_img, frame_paths, progress)
+            multi_process_frame(args, frame_paths, progress)
         else:
-            process_frames(source_img, frame_paths, progress)
+            process_frames(args, frame_paths, progress)

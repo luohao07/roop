@@ -16,7 +16,6 @@ import tensorflow
 from pathlib import Path
 import multiprocessing as mp
 import cv2
-import shutil
 
 import roop.globals
 from roop.swapper import process_video, process_img, process_faces, process_frames
@@ -26,7 +25,8 @@ import roop.ui as ui
 
 signal.signal(signal.SIGINT, lambda signal_number, frame: quit())
 parser = argparse.ArgumentParser()
-parser.add_argument('-f', '--face', help='use this face', dest='source_img')
+parser.add_argument('-f1', '--face1', help='use this face', dest='source_img1')
+parser.add_argument('-f2', '--face2', help='use this face', dest='source_img2')
 parser.add_argument('-t', '--target', help='replace this face', dest='target_path')
 parser.add_argument('-o', '--output', help='save output to this file', dest='output_file')
 parser.add_argument('--keep-fps', help='maintain original fps', dest='keep_fps', action='store_true', default=False)
@@ -36,7 +36,6 @@ parser.add_argument('--max-memory', help='maximum amount of RAM in GB to be used
 parser.add_argument('--cpu-cores', help='number of CPU cores to use', dest='cpu_cores', type=int, default=max(psutil.cpu_count() / 2, 1))
 parser.add_argument('--gpu-threads', help='number of threads to be use for the GPU', dest='gpu_threads', type=int, default=8)
 parser.add_argument('--gpu-vendor', help='choice your GPU vendor', dest='gpu_vendor', choices=['apple', 'amd', 'intel', 'nvidia'])
-parser.add_argument('-p', '--password', help='unzip password', dest='pwd', type=str)
 
 args = parser.parse_known_args()[0]
 
@@ -162,23 +161,29 @@ def process_video_multi_cores(source_img, frame_paths):
 
 
 def start(preview_callback = None):
-    if not args.source_img or not os.path.isfile(args.source_img):
+    if not args.source_img1 or not os.path.isfile(args.source_img1):
+        print("\n[WARNING] Please select an image containing a face.")
+        return
+    if args.source_img2 and not os.path.isfile(args.source_img2):
         print("\n[WARNING] Please select an image containing a face.")
         return
     elif not args.target_path or not os.path.isfile(args.target_path):
         print("\n[WARNING] Please select a video/image to swap face in.")
         return
-
     if not args.output_file:
         target_path = args.target_path
         args.output_file = rreplace(target_path, "/", "/swapped-", 1) if "/" in target_path else "swapped-" + target_path
     target_path = args.target_path
-    test_face = get_face_single(cv2.imread(args.source_img))
-    if not test_face:
+    test_face1 = get_face_single(cv2.imread(args.source_img1))
+    if not test_face1:
+        print("\n[WARNING] No face detected in source image. Please try with another one.\n")
+        return
+    test_face2 = get_face_single(cv2.imread(args.source_img2))
+    if not test_face2:
         print("\n[WARNING] No face detected in source image. Please try with another one.\n")
         return
     if is_img(target_path):
-        process_img(args.source_img, target_path, args.output_file)
+        process_img(args.source_img1, target_path, args.output_file)
         status("swap successful!")
         return
     video_name_full = target_path.split("/")[-1]
@@ -201,12 +206,7 @@ def start(preview_callback = None):
         key=lambda x: int(x.split(sep)[-1].replace(".png", ""))
     ))
     status("swapping in progress...")
-    if roop.globals.gpu_vendor is None and roop.globals.cpu_cores > 1:
-        global POOL
-        POOL = mp.Pool(roop.globals.cpu_cores)
-        process_video_multi_cores(args.source_img, args.frame_paths)
-    else:
-        process_video(args.source_img, args.frame_paths)
+    process_video(args, args.frame_paths)
     status("creating video...")
     create_video(video_name, exact_fps, output_dir)
     status("adding audio...")
