@@ -253,7 +253,7 @@ def run():
 
     pre_check()
     limit_resources()
-    if args.source_img:
+    if args.source_img1:
         args.cli_mode = True
         start()
         quit()
