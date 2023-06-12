@@ -32,10 +32,6 @@ def process_faces(source_face_1, source_face_2, target_frame):
         many_faces = get_face_many(target_frame)
         many_faces = sorted(many_faces, key=lambda x: x['bbox'][0])
         many_faces = [face for face in many_faces if face['gender'] == 0]
-        if not roop.globals.target_faces:
-            roop.globals.target_faces = many_faces
-        else:
-            many_faces = sort_by_target_faces(many_faces, roop.globals.target_faces)
         if (not many_faces) :
             return
         if len(many_faces) >= 1:
