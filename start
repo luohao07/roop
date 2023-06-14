@@ -1,0 +1,1 @@
+python run.py --gpu-thread=25 --gpu-vendor=nvidia -f1 ../roop_colab/WX.jpg -f2 ../roop_colab/WX.jpg -t ../roop_colab/u2.mp4 -o u2_wx.mp4

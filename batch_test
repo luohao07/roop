@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# 检查输入参数数量
+if [ "$#" -ne 2 ]; then
+  echo "使用方式: $0 input_dir output_dir"
+  exit 1
+fi
+
+# 检查输入目录是否存在
+if [ ! -d "$1" ]; then
+  echo "输入目录 $1 不存在"
+  exit 1
+fi
+
+# 检查输出目录是否存在，如果不存在则创建它
+if [ ! -d "$2" ]; then
+  mkdir -p "$2"
+fi
+
+# 遍历输入目录下的文件
+for file in "$1"/*; do
+  if [ -f "$file" ]; then
+    # 提取文件名和扩展名
+    filename=$(basename "$file")
+    extension="${filename##*.}"
+    filename="${filename%.*}"
+    echo "开始测试：$filename"
+    
+    # 执行命令
+    output_file="$2/$filename.mp4"
+    python run.py --gpu-thread=23 --gpu-vendor=nvidia -f1 "${file}" -f2 "${file}" -t ../roop_colab/test.mp4 -o "$output_file"
+    echo "已生成文件: $output_file"
+  fi
+done
+
