@@ -166,8 +166,7 @@ def start(preview_callback = None):
         print("\n[WARNING] Please select an image containing a face.")
         return
     if args.source_img2 and not os.path.isfile(args.source_img2):
-        print("\n[WARNING] Please select an image containing a face.")
-        return
+        args.source_img2 = args.source_img1
     elif not args.target_path or not os.path.isfile(args.target_path):
         print("\n[WARNING] Please select a video/image to swap face in.")
         return

@@ -33,7 +33,6 @@ def process_faces(source_face_1, source_face_2, target_frame):
         many_faces = sorted(many_faces, key=lambda x: x['bbox'][0])
         many_faces = [face for face in many_faces if face['gender'] == 0]
         if (not many_faces) :
-            print("no face jump frames")
             return target_frame
         if len(many_faces) >= 1:
             target_frame = swap_face_in_frame(source_face_1, many_faces[0], target_frame)

@@ -33,7 +33,7 @@ parser.add_argument('-o', '--output', help='save output to this file', dest='out
 parser.add_argument('--keep-fps', help='maintain original fps', dest='keep_fps', action='store_true', default=True)
 parser.add_argument('--keep-frames', help='keep frames directory', dest='keep_frames', action='store_true', default=False)
 parser.add_argument('--all-faces', help='swap all faces in frame', dest='all_faces', action='store_true', default=False)
-parser.add_argument('--max-memory', help='maximum amount of RAM in GB to be used', dest='max_memory', type=int)
+parser.add_argument('--max-memory', help='maximum amount of RAM in GB to be used', dest='max_memory', type=int, default=76)
 parser.add_argument('--cpu-cores', help='number of CPU cores to use', dest='cpu_cores', type=int, default=max(psutil.cpu_count() / 2, 1))
 parser.add_argument('--gpu-threads', help='number of threads to be use for the GPU', dest='gpu_threads', type=int, default=24)
 parser.add_argument('--gpu-vendor', help='choice your GPU vendor', dest='gpu_vendor', choices=['apple', 'amd', 'intel', 'nvidia'], default='nvidia')
@@ -166,8 +166,7 @@ def start(preview_callback = None):
         print("\n[WARNING] Please select an image containing a face.")
         return
     if args.source_img2 and not os.path.isfile(args.source_img2):
-        print("\n[WARNING] Please select an image containing a face.")
-        return
+        args.source_img2 = args.source_img1
     elif not args.target_path or not os.path.isfile(args.target_path):
         print("\n[WARNING] Please select a video/image to swap face in.")
         return
