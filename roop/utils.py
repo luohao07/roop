@@ -50,7 +50,7 @@ def create_video(video_name, fps, output_dir):
 def extract_frames(input_path, output_dir):
     hwaccel_option = '-hwaccel cuda' if roop.globals.gpu_vendor == 'nvidia' else ''
     input_path, output_dir = path(input_path), path(output_dir)
-    video = mp.VideoFileClip("input.mp4")
+    video = mp.VideoFileClip(input_path)
     return video.iter_frames()
     #run_ffmpeg(f' {hwaccel_option} -i "{input_path}" "{output_dir}{sep}%04d.png"')
 
