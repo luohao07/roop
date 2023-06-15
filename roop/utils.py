@@ -1,6 +1,7 @@
 import os
 import shutil
 import roop.globals
+import moviepy.editor as mp
 
 sep = "/"
 if os.name == "nt":
@@ -49,7 +50,9 @@ def create_video(video_name, fps, output_dir):
 def extract_frames(input_path, output_dir):
     hwaccel_option = '-hwaccel cuda' if roop.globals.gpu_vendor == 'nvidia' else ''
     input_path, output_dir = path(input_path), path(output_dir)
-    run_ffmpeg(f' {hwaccel_option} -i "{input_path}" "{output_dir}{sep}%04d.png"')
+    video = mp.VideoFileClip("input.mp4")
+    return video.iter_frames()
+    #run_ffmpeg(f' {hwaccel_option} -i "{input_path}" "{output_dir}{sep}%04d.png"')
 
 
 def add_audio(output_dir, target_path, video, keep_frames, output_file):

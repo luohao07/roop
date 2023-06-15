@@ -201,7 +201,9 @@ def start(preview_callback = None):
     else:
         shutil.copy(target_path, output_dir)
     status("extracting frames...")
-    extract_frames(target_path, output_dir)
+    frames = extract_frames(target_path, output_dir)
+    print(frames[0])
+    return;
     args.frame_paths = tuple(sorted(
         glob.glob(output_dir + "/*.png"),
         key=lambda x: int(x.split(sep)[-1].replace(".png", ""))
