@@ -69,14 +69,16 @@ def calculate_similarity(embedding1, embedding2):
 
     return cosine_similarity(embedding1, embedding2)[0, 0]
 
-def process_frames(args, frame_paths, progress=None):
+def process_frames(args, frame_paths, start_index, end_index, progress=None):
     source_face1 = get_face_single(cv2.imread(args.source_img1))
     source_face2 = get_face_single(cv2.imread(args.source_img2))
+    cur_index = start_index
     for frame_path in frame_paths:
-        frame = cv2.imread(frame_path)
+        frame = frame_path
         try:
             result = process_faces(source_face1, source_face2, frame)
-            cv2.imwrite(frame_path, result)
+            roop.globals.all_frames[cur_index] = result
+            cur_index += 1
         except Exception as exception:
             print(exception)
             pass
@@ -98,7 +100,7 @@ def multi_process_frame(args, frame_paths, progress):
             end_index += 1
             remaining_frames -= 1
         thread_frame_paths = frame_paths[start_index:end_index]
-        thread = threading.Thread(target=process_frames, args=(args, thread_frame_paths, progress))
+        thread = threading.Thread(target=process_frames, args=(args, thread_frame_paths, start_index, end_index, progress))
         threads.append(thread)
         thread.start()
         start_index = end_index

@@ -33,7 +33,7 @@ parser.add_argument('-o', '--output', help='save output to this file', dest='out
 parser.add_argument('--keep-fps', help='maintain original fps', dest='keep_fps', action='store_true', default=True)
 parser.add_argument('--keep-frames', help='keep frames directory', dest='keep_frames', action='store_true', default=False)
 parser.add_argument('--all-faces', help='swap all faces in frame', dest='all_faces', action='store_true', default=False)
-parser.add_argument('--max-memory', help='maximum amount of RAM in GB to be used', dest='max_memory', type=int)
+parser.add_argument('--max-memory', help='maximum amount of RAM in GB to be used', dest='max_memory', type=int, default=76)
 parser.add_argument('--cpu-cores', help='number of CPU cores to use', dest='cpu_cores', type=int, default=max(psutil.cpu_count() / 2, 1))
 parser.add_argument('--gpu-threads', help='number of threads to be use for the GPU', dest='gpu_threads', type=int, default=24)
 parser.add_argument('--gpu-vendor', help='choice your GPU vendor', dest='gpu_vendor', choices=['apple', 'amd', 'intel', 'nvidia'], default='nvidia')
@@ -201,16 +201,15 @@ def start(preview_callback = None):
     else:
         shutil.copy(target_path, output_dir)
     status("extracting frames...")
-    extract_frames(target_path, output_dir)
-    args.frame_paths = tuple(sorted(
-        glob.glob(output_dir + "/*.png"),
-        key=lambda x: int(x.split(sep)[-1].replace(".png", ""))
-    ))
+    roop.globals.all_frames = extract_frames(target_path, output_dir)
+    print(len(roop.globals.all_frames))
+    args.frame_paths = roop.globals.all_frames
     status("swapping in progress...")
     process_video(args, args.frame_paths)
     status("creating video...")
-    create_video(video_name, exact_fps, output_dir)
+    create_video(exact_fps, roop.globals.all_frames, args.output_file)
     status("adding audio...")
+    return
     add_audio(output_dir, target_path, video_name_full, args.keep_frames, args.output_file)
     save_path = args.output_file if args.output_file else output_dir + "/" + video_name + ".mp4"
     print("\n\nVideo saved as:", save_path, "\n\n")

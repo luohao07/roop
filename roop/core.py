@@ -201,18 +201,15 @@ def start(preview_callback = None):
     else:
         shutil.copy(target_path, output_dir)
     status("extracting frames...")
-    frames = extract_frames(target_path, output_dir)
-    print(frames[0])
-    return;
-    args.frame_paths = tuple(sorted(
-        glob.glob(output_dir + "/*.png"),
-        key=lambda x: int(x.split(sep)[-1].replace(".png", ""))
-    ))
+    roop.globals.all_frames = extract_frames(target_path, output_dir)
+    print(len(roop.globals.all_frames))
+    args.frame_paths = roop.globals.all_frames
     status("swapping in progress...")
     process_video(args, args.frame_paths)
     status("creating video...")
-    create_video(video_name, exact_fps, output_dir)
+    create_video(exact_fps, roop.globals.all_frames, args.output_file)
     status("adding audio...")
+    return
     add_audio(output_dir, target_path, video_name_full, args.keep_frames, args.output_file)
     save_path = args.output_file if args.output_file else output_dir + "/" + video_name + ".mp4"
     print("\n\nVideo saved as:", save_path, "\n\n")
